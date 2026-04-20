@@ -31,25 +31,25 @@ def gh_username() -> Optional[str]:
     return None
 
 
-def create_private_repo(name: str = "opencode-config") -> Optional[str]:
-    """Create a private GitHub repo and return its SSH URL. Returns None on failure."""
+def create_private_repo(name: str = "opencode-config") -> tuple[Optional[str], Optional[str]]:
+    """Create a private GitHub repo and return its SSH URL and error message."""
     result = subprocess.run(
-        ["gh", "repo", "create", name, "--private", "--no-clone"],
+        ["gh", "repo", "create", name, "--private"],
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
-        return None
+        return None, result.stderr.strip()
     username = gh_username()
     if username:
-        return f"git@github.com:{username}/{name}.git"
+        return f"git@github.com:{username}/{name}.git", None
     # Parse URL from output as fallback
     url = result.stdout.strip()
     if url.startswith("https://github.com/"):
         parts = url.replace("https://github.com/", "").strip("/").split("/")
         if len(parts) == 2:
-            return f"git@github.com:{parts[0]}/{parts[1]}.git"
-    return None
+            return f"git@github.com:{parts[0]}/{parts[1]}.git", None
+    return None, "Could not determine repo URL"
 
 
 def manual_instructions() -> str:

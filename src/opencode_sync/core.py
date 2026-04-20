@@ -34,11 +34,11 @@ def cmd_init(repo_url: Optional[str] = None) -> None:
     if not repo_url:
         if github.gh_authenticated():
             console.print("GitHub CLI detected. Creating private repo [bold]opencode-config[/bold]...")
-            repo_url = github.create_private_repo()
+            repo_url, error = github.create_private_repo()
             if repo_url:
                 console.print(f"[green]Created:[/green] {repo_url}")
             else:
-                console.print("[red]Failed to create repo via gh.[/red]")
+                console.print(f"[red]Failed to create repo via gh.[/red]\n{error}")
                 console.print(github.manual_instructions())
                 return
         else:
